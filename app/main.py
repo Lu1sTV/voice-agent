@@ -51,12 +51,17 @@ def health():
     dependencies=[Depends(require_api_key)]
 )
 def lookup_user(request: UserLookupRequest):
-    user = get_user_by_username(request.username)
+    username = request.username.strip().lower()
+
+    print(
+        f"LOOKUP USERNAME RECEIVED: {request.username!r} -> NORMALIZED: {username!r}",
+        flush=True
+    )
+
+    user = get_user_by_username(username)
 
     if user is None:
-        return UserLookupResponse(
-            found=False
-        )
+        return UserLookupResponse(found=False)
 
     return UserLookupResponse(
         found=True,
@@ -65,7 +70,6 @@ def lookup_user(request: UserLookupRequest):
         display_name=user["display_name"],
         account_locked=bool(user["account_locked"])
     )
-
 
 @app.post(
     "/verification/start",
