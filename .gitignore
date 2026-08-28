@@ -1,7 +1,15 @@
 .venv/
-__pycache__
+venv/
+
+__pycache__/
 *.pyc
+
 .env
+.env.*
+
+.DS_Store
 
 data/*.db
 data/*.db-journal
+data/*.db-shm
+data/*.db-wal
