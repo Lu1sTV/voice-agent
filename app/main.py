@@ -1,8 +1,9 @@
-        
+
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 
+from app.auth import require_api_key
 from app.database import (
     init_db,
     get_user_by_username,
@@ -11,7 +12,6 @@ from app.database import (
     confirm_verification,
     reset_password,
 )
-
 from app.schemas import (
     UserLookupRequest,
     UserLookupResponse,
@@ -32,6 +32,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Voice API",
+    version="0.1.0",
     lifespan=lifespan
 )
 
@@ -40,13 +41,14 @@ app = FastAPI(
 def health():
     return {
         "status": "ok",
-	"version": "0.1"
+        "version": "0.1.0"
     }
 
 
 @app.post(
     "/users/lookup",
-    response_model=UserLookupResponse
+    response_model=UserLookupResponse,
+    dependencies=[Depends(require_api_key)]
 )
 def lookup_user(request: UserLookupRequest):
     user = get_user_by_username(request.username)
@@ -67,7 +69,8 @@ def lookup_user(request: UserLookupRequest):
 
 @app.post(
     "/verification/start",
-    response_model=VerificationStartResponse
+    response_model=VerificationStartResponse,
+    dependencies=[Depends(require_api_key)]
 )
 def start_verification(
     request: VerificationStartRequest
@@ -92,7 +95,8 @@ def start_verification(
 
 @app.post(
     "/verification/confirm",
-    response_model=VerificationConfirmResponse
+    response_model=VerificationConfirmResponse,
+    dependencies=[Depends(require_api_key)]
 )
 def verify_code(
     request: VerificationConfirmRequest
@@ -115,7 +119,8 @@ def verify_code(
 
 @app.post(
     "/password-reset",
-    response_model=PasswordResetResponse
+    response_model=PasswordResetResponse,
+    dependencies=[Depends(require_api_key)]
 )
 def change_password(
     request: PasswordResetRequest
